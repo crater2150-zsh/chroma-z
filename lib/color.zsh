@@ -37,7 +37,7 @@ if [[ "`tput colors`" == "256" ]] || [[ "`tput colors`" == "88" ]] ; then
 		usercolor_mod=28
 
 	fi
-	if [ ! -z $SSH_CLIENT ] || [ ! -z $SSH_CONNECTION ]; then
+	if in_ssh_session; then
 		usercolor_base=$((usercolor_base + usercolor_mod))
 		hostcolor=$(color_fg 226)
 	else

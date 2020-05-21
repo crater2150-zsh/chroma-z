@@ -31,3 +31,10 @@ exitstatus () {
   fi
 }
 
+in_ssh_session() {
+  if command -v pstree &>/dev/null; then
+    pstree -s $$ | grep -q sshd
+  else
+    [ ! -z $SSH_CLIENT ] || [ ! -z $SSH_CONNECTION ]
+  fi
+}

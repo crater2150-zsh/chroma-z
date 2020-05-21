@@ -5,9 +5,9 @@ autoload -U promptinit
 PROMPT_UNICODE=${PROMPT_UNICODE:-yes}
 setopt prompt_subst
 
+source $(dirname $0)/lib/infos.zsh
 source $(dirname $0)/lib/color.zsh
 source $(dirname $0)/lib/vcs.zsh
-source $(dirname $0)/lib/infos.zsh
 
 typeset -gA _PROMPT_CHR
 if [[ "$PROMPT_UNICODE" == "yes" ]]; then
