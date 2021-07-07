@@ -5,9 +5,9 @@ autoload -U promptinit
 PROMPT_UNICODE=${PROMPT_UNICODE:-yes}
 setopt prompt_subst
 
-source $(dirname $0)/lib/infos.zsh
-source $(dirname $0)/lib/color.zsh
-source $(dirname $0)/lib/vcs.zsh
+. $(dirname $0)/lib/infos.zsh
+. $(dirname $0)/lib/color.zsh
+. $(dirname $0)/lib/vcs.zsh
 
 typeset -gA _PROMPT_CHR
 if [[ "$PROMPT_UNICODE" == "yes" ]]; then
@@ -37,11 +37,11 @@ local function prompt_block() {
   local block_color="$1"
   shift
   echo -n "${cond:+"%($cond[2]."}${block_color}${_PROMPT_CHR[PREFIX]} $* "
-  echo -n "${_PROMPT_CHR[SUFFIX]}${rpscolor}${cond:+".)"}"
+  echo -n "${_PROMPT_CHR[SUFFIX]}${__color[rps]}${cond:+".)"}"
 }
 
 local function dir_info() {
-  local dircolor=$([[ -w $PWD ]] && echo "${pathcolor}" || echo "${ropathcolor}")
+  local dircolor=$([[ -w $PWD ]] && echo "${__color[path]}" || echo "${__color[path_ro]}")
   prompt_block $dircolor "%(5~|%-1~/.../|)%3~"
 }
 
@@ -51,10 +51,10 @@ local function venv_info() {
     if [[ $venvname == "venv" ]]; then
       venvname=${VIRTUAL_ENV:h:t}/${VIRTUAL_ENV:t}
     fi
-    prompt_block $usercolor "venv: ${venvname}"
+    prompt_block ${__color[user]} "venv: ${venvname}"
   fi
   if [[ -n "$CONDA_DEFAULT_ENV" ]] then
-    prompt_block $usercolor "conda: ${CONDA_DEFAULT_ENV}"
+    prompt_block ${__color[user]} "conda: ${CONDA_DEFAULT_ENV}"
   fi
 }
 
@@ -64,16 +64,16 @@ local function theme_precmd() {
 
   vcs_info
 
-  infoline_left+=( "${rpscolor}${_PROMPT_CHR[CORNER_LU]}" )
+  infoline_left+=( "${__color[rps]}${_PROMPT_CHR[CORNER_LU]}" )
 
   ### First, assemble the top line
   infoline_left+=("$(dir_info)")
   infoline_left+=("$(venv_info)")
 
   # Username & host
-  infoline_right+=("$(prompt_block --if 1j ${gitdirty} "Jobs: %j" )")
-  infoline_right+=($(prompt_block "" "${usercolor}%n${reset}@${hostcolor}%m${rpscolor}" ))
-  infoline_right+=("${rpscolor}${_PROMPT_CHR[CORNER_RU]}")
+  infoline_right+=("$(prompt_block --if 1j ${__color[gitdirty]} "Jobs: %j" )")
+  infoline_right+=($(prompt_block "" "${__color[user]}%n${__color[reset]}@${__color[host]}%m${__color[rps]}" ))
+  infoline_right+=("${__color[rps]}${_PROMPT_CHR[CORNER_RU]}")
 
   # remove color escapes, expand all remaining escapes and count the chars
   local infostr=($infoline_left $infoline_right)
@@ -81,7 +81,7 @@ local function theme_precmd() {
   i_width=${#${(%)${(S)${(j::)infostr}//\%\{*\%\}}}}
 
   filler=$(printf "${_PROMPT_CHR[HBAR]}%.0s" {2..$((COLUMNS - $i_width))})
-  #filler="${rpscolor}${(l:$(( $COLUMNS - $i_width))::$_PROMPT_CHR[HBAR]:)}"
+  #filler="${__color[rps]}${(l:$(( $COLUMNS - $i_width))::$_PROMPT_CHR[HBAR]:)}"
 
   infoline_both=($infoline_left $filler $infoline_right)
   lines+=( ${(j::)infoline_both} )
@@ -89,7 +89,7 @@ local function theme_precmd() {
 
   # middle info line, only shown if not empty
 
-  middleline+=( "${rpscolor}${_PROMPT_CHR[VBAR]} ")
+  middleline+=( "${__color[rps]}${_PROMPT_CHR[VBAR]} ")
 
   if [[ -n ${vcs_info_msg_0_} ]]; then
     middleline+=( "$(vcs_char) ${vcs_info_msg_0_}${reset}" )
@@ -100,14 +100,14 @@ local function theme_precmd() {
 
   ### Now, assemble all prompt lines
   if [[ $#middleline > 1 ]] then
-    lines+=( "${middleline}${filler}${rpscolor}${_PROMPT_CHR[VBAR]}" )
+    lines+=( "${middleline}${filler}${__color[rps]}${_PROMPT_CHR[VBAR]}" )
   fi
 
-  lines+=( "${_PROMPT_CHR[CORNER_LD]}${_PROMPT_CHR[PREFIX]} ${usercolor}%#${reset} " )
+  lines+=( "${_PROMPT_CHR[CORNER_LD]}${_PROMPT_CHR[PREFIX]} ${__color[user]}%#${reset} " )
 
   ### Finally, set the prompt
   PROMPT=${(F)lines}
-  RPS1="$usercolor${_PROMPT_CHR[ARR_LEFT]}%(?::$exitcolor${_PROMPT_CHR[PREFIX]})\$(exitstatus)%(?::${_PROMPT_CHR[SUFFIX]})${stycolor}${_PROMPT_CHR[PREFIX]}$(sty)${rpscolor}${_PROMPT_CHR[SUFFIX]}${_PROMPT_CHR[CORNER_RD]}$reset"
+  RPS1="${__color[user]}${_PROMPT_CHR[ARR_LEFT]}%(?::${__color[exit]}${_PROMPT_CHR[PREFIX]})\$(__chromaz::exitstatus)%(?::${_PROMPT_CHR[SUFFIX]})${__color[sty]}${_PROMPT_CHR[PREFIX]}$(__chromaz::sty)${__color[rps]}${_PROMPT_CHR[SUFFIX]}${_PROMPT_CHR[CORNER_RD]}$reset"
 }
 
 add-zsh-hook precmd theme_precmd

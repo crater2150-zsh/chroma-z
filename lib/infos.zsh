@@ -1,5 +1,5 @@
 # Show screen STY and tmux number
-sty () {
+__chromaz::sty () {
 	local sty=$?
 	echo -n "${STY:+"SCREEN:"}${(S)STY/#*./}${STY+" - "}"
 	echo -n "${TMUX:+"TMUX:"}${TMUX/*,/}${TMUX+" - "}"
@@ -7,7 +7,7 @@ sty () {
 }
 
 # show number of attached and detached screens
-screennum() {
+__chromaz::screennum() {
 	local att
 	local det
 	local dead
@@ -19,7 +19,7 @@ screennum() {
 	fi
 }
 
-exitstatus () {
+__chromaz::exitstatus () {
   local exitstatus=$?
 
   if [ $exitstatus -ne 0 ] ; then
@@ -31,7 +31,7 @@ exitstatus () {
   fi
 }
 
-in_ssh_session() {
+__chromaz::in_ssh_session() {
   if command -v pstree &>/dev/null; then
     pstree -s $$ | grep -q sshd
   else

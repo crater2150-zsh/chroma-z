@@ -7,7 +7,12 @@ autoload -U colors && colors
 #
 # 256-color-term or rxvt with wrong tput output
 #
-if [[ "`tput colors`" == "256" ]] || [[ "`tput colors`" == "88" ]] ; then
+typeset -gA __color
+
+local term_colors=$(tput colors)
+if [[ $term_colors -gt 16 ]] ; then
+	local usercolor_base usercolor_mod colorfile
+
 	local BOLD="[01m"
 	local color_fg() {
 		echo "%{$2[38;5;${1}m%}"
@@ -16,19 +21,21 @@ if [[ "`tput colors`" == "256" ]] || [[ "`tput colors`" == "88" ]] ; then
 		echo "%{$2[48;5;${1}m%}"
 	}
 
-	reset="%{${reset_color}%}"
-	pathcolor=$(color_fg 27)
-	ropathcolor=$(color_fg 92)
+	__color=(
+		[reset]="%{${reset_color}%}"
+		[path]=$(color_fg 27)
+		[path_ro]=$(color_fg 92)
+		[gitdirty]=$(color_fg 160 $BOLD)
+		[gitstaged]=$(color_fg 34 $BOLD)
+		[gitclean]=$(color_fg 240)
+		[sty]=$(color_fg 240)
+		[rps]=$(color_fg 238)
+		[gituntracked]="$(color_fg 253 $BOLD)"
+		[vcs_revision]="$(color_fg 251 $BOLD)"
+	)
 
-	gitdirty=$(color_fg 160 $BOLD)
-	gitstaged=$(color_fg 34 $BOLD)
-	gitclean=$(color_fg 240)
-	stycolor=$(color_fg 240)
-	exitcolor=$gitdirty
-	rpscolor=$(color_fg 238)
-	gituntracked="$(color_fg 253 $BOLD)●${reset}${rpscolor}"
+	__color[exit]=${__color[gitdirty]}
 
-	local usercolor_base
 	if [ "$EUID" = "0" ] || [ "$USER" = "root" ] ; then
 		usercolor_base=196
 		usercolor_mod=30
@@ -37,13 +44,13 @@ if [[ "`tput colors`" == "256" ]] || [[ "`tput colors`" == "88" ]] ; then
 		usercolor_mod=28
 
 	fi
-	if in_ssh_session; then
+	if __chromaz::in_ssh_session; then
 		usercolor_base=$((usercolor_base + usercolor_mod))
-		hostcolor=$(color_fg 226)
+		__color[host]=$(color_fg 226)
 	else
-		hostcolor=$gitclean
+		__color[host]=${__color[gitclean]}
 	fi
-	usercolor=$(color_fg $usercolor_base $BOLD)
+	__color[user]=$(color_fg $usercolor_base $BOLD)
 
 	for colorfile in /etc/DIR_COLORS.256 \
 	                 /etc/DIR_COLORS.256color \
@@ -55,31 +62,35 @@ if [[ "`tput colors`" == "256" ]] || [[ "`tput colors`" == "88" ]] ; then
 		fi
 	done
 else
-	pathcolor="%{$fg_bold[blue]}%}"
+	__color=(
+		[reset]="%{${reset_color}%}"
+		[path]="%{$fg_bold[blue]}%}"
+		[path_ro]="%{$fg_bold[magenta]}%}"
+		[gitdirty]="%{${fg[yellow]}%}"
+		[gitstaged]="%{${fg[green]}%}"
+		[gitclean]="%{${fg[white]}%}"
+		[sty]="%{$fg_no_bold[black]}%}"
+		[rps]="%{$fg_bold[black]}%}"
+		[vcs_revision]="%{${fg_bold[black]}%}"
+	)
 
-	gitdirty="%{${fg[yellow]}%}"
-	gitstaged="%{${fg[green]}%}"
-	gitclean="%{${fg[white]}%}"
-	vcs_revision="%{${fg_bold[black]}%}"
-
-	exitcolor="$gitdirty"
-	rpscolor="%{$fg_bold[black]}%}"
+	__color[exit]=${__color[gitdirty]}
 
 	if [ "$EUID" = "0" ] || [ "$USER" = "root" ] ; then
 		if [ ! -z $SSH_CLIENT ]; then
-			usercolor="%{${fg_bold[yellow]}%}"
-			hostcolor="%{${fg_no_bold[blue]}%}"
+			__color[user]="%{${fg_bold[yellow]}%}"
+			__color[host]="%{${fg_no_bold[blue]}%}"
 		else
-			usercolor="%{${fg_bold[red]}%}"
-			hostcolor="%{${fg_bold[black]}%}"
+			__color[user]="%{${fg_bold[red]}%}"
+			__color[host]="%{${fg_bold[black]}%}"
 		fi
 	else
 		if [ ! -z $SSH_CLIENT ]; then
-			usercolor="%{${fg_bold[blue]}%}"
-			hostcolor="%{${fg_no_bold[blue]}%}"
+			__color[user]="%{${fg_bold[blue]}%}"
+			__color[host]="%{${fg_no_bold[blue]}%}"
 		else
-			usercolor="%{${fg_bold[green]}%}"
-			hostcolor="%{${fg_bold[black]}%}"
+			__color[user]="%{${fg_bold[green]}%}"
+			__color[host]="%{${fg_bold[black]}%}"
 		fi
 	fi
 fi
