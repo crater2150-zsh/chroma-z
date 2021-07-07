@@ -9,6 +9,7 @@ setopt prompt_subst
 . $(dirname $0)/lib/color.zsh
 . $(dirname $0)/lib/vcs.zsh
 
+typeset -ga __chromaz_extra_left
 typeset -gA _PROMPT_CHR
 if [[ "$PROMPT_UNICODE" == "yes" ]]; then
   _PROMPT_CHR[PREFIX]="╼╢"
@@ -69,6 +70,13 @@ local function theme_precmd() {
   ### First, assemble the top line
   infoline_left+=("$(dir_info)")
   infoline_left+=("$(venv_info)")
+  local extrainfo extrainfo_val
+  for extrainfo in ${__chromaz_extra_left[@]}; do
+	extrainfo_val="$($extrainfo)"
+	if [[ -n $extrainfo_val ]]; then
+	  infoline_left+=("$(prompt_block ${__color[user]} $extrainfo_val)")
+	fi
+  done
 
   # Username & host
   infoline_right+=("$(prompt_block --if 1j ${__color[gitdirty]} "Jobs: %j" )")
