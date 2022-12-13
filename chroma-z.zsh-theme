@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 autoload -U promptinit
+autoload -U add-zsh-hook
 
 PROMPT_UNICODE=${PROMPT_UNICODE:-yes}
 setopt prompt_subst
