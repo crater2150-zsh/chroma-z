@@ -100,7 +100,7 @@ local function theme_precmd() {
   middleline+=( "${__color[rps]}${_PROMPT_CHR[VBAR]} ")
 
   if [[ -n ${vcs_info_msg_0_} ]]; then
-    middleline+=( "$(vcs_char) ${vcs_info_msg_0_}${reset}" )
+    middleline+=( "$(vcs_char) ${vcs_info_msg_0_}${__color[reset]}" )
   fi
 
   i_width=${#${(%)${(S)${(j::)middleline}//\%\{*\%\}}}}
@@ -111,11 +111,11 @@ local function theme_precmd() {
     lines+=( "${middleline}${filler}${__color[rps]}${_PROMPT_CHR[VBAR]}" )
   fi
 
-  lines+=( "${_PROMPT_CHR[CORNER_LD]}${_PROMPT_CHR[PREFIX]} ${__color[user]}%#${reset} " )
+  lines+=( "${_PROMPT_CHR[CORNER_LD]}${_PROMPT_CHR[PREFIX]} ${__color[user]}%#${__color[reset]} " )
 
   ### Finally, set the prompt
   PROMPT=${(F)lines}
-  RPS1="${__color[user]}${_PROMPT_CHR[ARR_LEFT]}%(?::${__color[exit]}${_PROMPT_CHR[PREFIX]})\$(__chromaz::exitstatus)%(?::${_PROMPT_CHR[SUFFIX]})${__color[sty]}${_PROMPT_CHR[PREFIX]}$(__chromaz::sty)${__color[rps]}${_PROMPT_CHR[SUFFIX]}${_PROMPT_CHR[CORNER_RD]}$reset"
+  RPS1="${__color[user]}${_PROMPT_CHR[ARR_LEFT]}%(?::${__color[exit]}${_PROMPT_CHR[PREFIX]})\$(__chromaz::exitstatus)%(?::${_PROMPT_CHR[SUFFIX]})${__color[sty]}${_PROMPT_CHR[PREFIX]}$(__chromaz::sty)${__color[rps]}${_PROMPT_CHR[SUFFIX]}${_PROMPT_CHR[CORNER_RD]}${__color[reset]}"
 }
 
 add-zsh-hook precmd theme_precmd
