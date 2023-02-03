@@ -32,9 +32,6 @@ __chromaz::exitstatus () {
 }
 
 __chromaz::in_ssh_session() {
-  if command -v pstree &>/dev/null; then
-    pstree -s $$ | grep -q sshd
-  else
-    [ ! -z $SSH_CLIENT ] || [ ! -z $SSH_CONNECTION ]
-  fi
+  (command -v pstree &>/dev/null && pstree -s $$ | grep -q sshd) \
+    || [[ -n $SSH_CLIENT ]] || [[ -n $SSH_CONNECTION ]]
 }
