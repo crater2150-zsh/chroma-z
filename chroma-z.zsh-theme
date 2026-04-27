@@ -100,8 +100,11 @@ local function theme_precmd() {
 
   middleline+=( "${__color[rps]}${_PROMPT_CHR[VBAR]} ")
 
-  if [[ -n ${vcs_info_msg_0_} ]]; then
-    middleline+=( "$(vcs_char) ${vcs_info_msg_0_}${__color[reset]}" )
+  if [[ -n "${vcs_info_msg_0_}" ]]; then
+    local safe_vcs_info
+    safe_vcs_info="${vcs_info_msg_0_//\`/\\\`}"
+    safe_vcs_info="${safe_vcs_info//\$/\\\$}"
+    middleline+=( "$(vcs_char) ${safe_vcs_info}${__color[reset]}" )
   fi
 
   i_width=${#${(%)${(S)${(j::)middleline}//\%\{*\%\}}}}
